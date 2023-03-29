@@ -1,0 +1,95 @@
+{% extends 'index.html' %}
+
+{% block contenido %}
+{% load static %}
+
+{% if personaform.errors %}
+  <div class="alert alert-danger">
+    {% for field_errors in personaform.errors.values %}
+      {% for error in field_errors %}
+        {{ error }}
+      {% endfor %}
+    {% endfor %}
+  </div>
+{% endif %}
+<form method="POST" class="post-form" action="/persona/nuevo/">
+    {% csrf_token %}
+    <div class="container">
+        <br>
+        <div class="form-group row">
+            <label class="col-sm-1 col-form-label"></label>
+            <div class="col-sm-4">
+                <h3><i class="fa fa-group"></i> Registrar Persona</h3>
+            </div>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-sm-4"><i class="fa fa-address-card"></i> Id:</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="text" name="id" id="id" required maxlength="13"/> 
+            </div>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-sm-4"><i class="fa fa-user"></i> Nombre:</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="text" name="nombre" id="nombre" required maxlength="30"/> 
+            </div>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-sm-4"><i class="fa fa-navicon"></i> Nacimiento:</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="date" name="nacimiento" id="nacimiento" required/> 
+            </div>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-sm-4"><i class="fa fa-navicon"></i> Pais:</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="nacionalidad" required id="nacionalidad" >
+                    <option selected value="-1">Seleccionar</option>
+                    {% for n in paises %}
+                    <option value="{{n.id}}">{{n.nombre}}</option>
+                   {% endfor %}
+                  </select>
+            </div>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-sm-4"><i class="fa fa-navicon"></i> Nacionalidad:</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="text" name="nac" id="nac" readonly/> 
+            </div>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-sm-6 col-form-label"></label>
+            <div class="col-sm-4">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle"></i> Grabar</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock contenido %}
+
+{% block javascript %}
+<script>
+// A $( document ).ready() block.
+$(document).ready(function() {
+    document.getElementById("nacionalidad").addEventListener("change", function() {
+        var paisValue = document.getElementById("nacionalidad").value;
+        if (paisValue != -1){
+            $.ajax({
+            url: "{% url 'appCrud:ajax_campo' %}",
+            type: "GET",
+            data: {
+                'nacionalidad': paisValue,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'  // Agrega esta línea si estás usando CSRF protection
+            },
+            dataType: 'json',
+            success: function(data) {
+                document.getElementById("nac").value = data.nacionalidad;
+            }
+            });
+        }else{
+            document.getElementById("nac").value = "";
+        }  
+      });
+});
+</script>
+{% endblock javascript %}
